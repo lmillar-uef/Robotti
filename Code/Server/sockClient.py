@@ -11,3 +11,7 @@ def sendMessage(msg):
     
 def listenSock():
     return s.recv(1024).decode("utf-8")
+
+def shutDown():
+    s.shutdown(socket.SHUT_RDWR)
+    s.close()
