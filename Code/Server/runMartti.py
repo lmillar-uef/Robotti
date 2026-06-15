@@ -9,6 +9,7 @@ import sockClient as sock
 from threading import Thread
 import time
 import car
+from queue import Queue
 
 
 
@@ -21,8 +22,11 @@ servo1_home = 90
 
 
 
-def excecuteCommand(msg):
-	if msg == "chase":
+def excecuteCommand(in_q):
+    #get message from queue
+    msg = in_q.get()
+    #excecute command
+    if msg == "chase":
 		ledi.theaterChaseRainbow()
 	if msg == "autobots":
 		car.test_car_sonic()
@@ -43,24 +47,32 @@ def excecuteCommand(msg):
 	if msg == "kys":
 	    sock.shutDown()
 	    
+def listenForCommand(out_q):
+    while True:
+	    print("Listening...")
+	    ledi.colorWipe((0, 255, 0))
+	    msg = sock.listenSock()
+	    print(msg)
+	    ##put msg in queue for excecution
+	    out_q.put(msg)
+	    out_q.put(_sentinel)
 
-excecute = Thread(target = excecuteCommand, args = ())
 
-
+##CONNECTION
 while connected == False:
 	connected = sock.connectSock() ### Jetson send "connectd" -> connected True
 	if sock.listenSock() == "connected":
 		connected = True
 		print("connected")
 		ledi = led.Led()
-	
-while True:
-	print("Listening...")
-	msg = sock.listenSock()
-	print(msg)
-	excecute = Thread(target = excecuteCommand, args = (msg,))
-	excecute.start()
-	
+		
+##Two threads for excecuting and listening
+enderChest = Queue()
+excecute = Thread(target = excecuteCommand, args = (enderChest,))
+listen = Thread(target = listenForCommand, args = (enderChest,))
+excecute.start()
+listen.start()
+
 
 	
 
