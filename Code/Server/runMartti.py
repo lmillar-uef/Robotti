@@ -37,8 +37,7 @@ while True:
 		speaker.playFrequency("A4")
 	if msg == "autobots":	
 		servo.setServoAngle('0', 50)
-		servo.setServoAngle('1',70)
-        
+		servo.setServoAngle('1',70)   
 	if msg == "stop":		
 		speaker.stop()
 	if msg == "kys":
