@@ -7,6 +7,7 @@ import led
 #import camera
 import speakerGpio
 import sockClient as sock
+from threading import Thread
 
 
 connected = False
@@ -37,5 +38,7 @@ while True:
 		speaker.stop()
 	if msg == "off":
 	    sock.shutDown()
+	    break
+
 	
 
