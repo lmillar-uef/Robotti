@@ -31,7 +31,7 @@ def excecuteCommand(in_q):
 		msg = in_q.get()
 		print("got.")
 		#excecute command
-		if msg == "chase":
+		if msg == "flash":
 			ledi.theaterChaseRainbow()
 		if msg == "autobots":
 			car.test_car_sonic()
@@ -49,7 +49,15 @@ def excecuteCommand(in_q):
 			servo.setServoAngle('1', servo1_home)  
 		if msg == "stop":		
 			speaker.stop()
-		if msg == "kys":
+		if msg == "go forwards":
+			pass
+		if msg == "go backwards":
+			pass
+		if msg == "turn left":
+			pass
+		if msg == "turn right":
+			pass
+		if msg == "off":
 			sock.shutDown()
 			break
 		print("exceuted")
