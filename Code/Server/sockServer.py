@@ -3,12 +3,11 @@ import time
 from threading import Timer
 from threading import Thread
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-s.bind(('0.0.0.0', 8702))
-s.listen()
-print('Server is now running.')
-
+def connect():
+    clientSocket, address = s.accept()
+    clientSocket.send(bytes("connected", "utf-8"))
+    return clientSocket, address
+    
 def background_controller():
     msg = input("Send message:")
     clientSocket.send(bytes(msg, "utf-8"))
@@ -17,17 +16,25 @@ def background_controller():
 def listen():
     #process msg
     print(clientSocket.recv(1024).decode("utf-8"))
+    Timer(1, listen).start()
 
-listener_thread = Thread(target=listen, daemon=True)
 
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+s.bind(('0.0.0.0', 6767))
+s.listen()
+print('Server is now running.')
+
+#clientSocket, address = connect()
+#listener_thread = Thread(target=listen, daemon=True)
     
 try:
     while True:
-        clientSocket, address = s.accept()
-        clientSocket.send(bytes("connected", "utf-8"))
+        clientSocket, address = connect()
         print(f"Connection from {address} has been established.")
-        listener_thread.start()
+        #listener_thread.start()
         background_controller()
+        listen()
         
     
     
