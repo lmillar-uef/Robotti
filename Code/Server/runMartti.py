@@ -5,7 +5,7 @@ import ultrasonic
 #import infrared
 import led
 #import camera
-import sock
+import sockClient
 
 
 connected = False
@@ -25,6 +25,8 @@ while True:
 		ledi.theaterChaseRainbow()
 	if msg == "I love you":
 		ledi.colorWipe((255, 0, 0))
+	if msg == "ping":
+	    sock.sendMessage("pong")
 		
 		
 	
