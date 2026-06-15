@@ -5,10 +5,14 @@ import ultrasonic
 #import infrared
 import led
 #import camera
-import sockClient
+import speakerGpio
+import sockClient as sock
 
 
 connected = False
+speaker=speakerGpio.Speaker()
+
+
 
 while connected == False:
 	connected = sock.connectSock() ### Jetson send "connectd" -> connected True
@@ -27,7 +31,9 @@ while True:
 		ledi.colorWipe((255, 0, 0))
 	if msg == "ping":
 	    sock.sendMessage("pong")
-		
-		
+	if msg == "play":	
+		speaker.playFrequency("A4")
+	if msg == "stop":		
+		speaker.stop()
 	
 
