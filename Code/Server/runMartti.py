@@ -24,6 +24,7 @@ servo1_home = 90
 
 
 def excecuteCommand(in_q):
+
 	while True:
 		print("getting mesage...")
 		#get message from queue
@@ -54,6 +55,7 @@ def excecuteCommand(in_q):
 		print("exceuted")
 		in_q.task_done()
     
+
 	    
 def listenForCommand(out_q):
 	while True:
