@@ -1,4 +1,4 @@
-import  servo
+import servo
 import servoForSpeaker
 import motor
 import ultrasonic
@@ -36,8 +36,8 @@ while True:
 	if msg == "play":	
 		speaker.playFrequency("A4")
 	if msg == "autobots":	
-		servo.setServoAngle('0', 50)
-		servo.setServoAngle('1',70)
+		servo.setServoAngle('0', 150)
+		servo.setServoAngle('1',90)
         
 	if msg == "stop":		
 		speaker.stop()

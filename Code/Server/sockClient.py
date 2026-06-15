@@ -2,7 +2,7 @@ import socket
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-def connectSock(ip = "10.239.227.76", port = 8702):
+def connectSock(ip = "10.239.227.76", port = 6767):
     s.connect((ip, port))
     
 def sendMessage(msg):
