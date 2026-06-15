@@ -13,5 +13,5 @@ def listenSock():
     return s.recv(1024).decode("utf-8")
 
 def shutdown():
-    s.shutdown(socket.SHUT_RDWR)
+    s.shutDown(socket.SHUT_RDWR)
     s.close()
