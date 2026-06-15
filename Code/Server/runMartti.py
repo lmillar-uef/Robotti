@@ -22,14 +22,14 @@ servo1_home = 90
 
 
 def excecuteCommand(msg):
-    if msg == "chase":
+	if msg == "chase":
 		ledi.theaterChaseRainbow()
 	if msg == "autobots":
-		 car.test_car_sonic()
+		car.test_car_sonic()
 	if msg == "I love you":
 		ledi.colorWipe((255, 0, 0))
 	if msg == "ping":
-	    sock.sendMessage("pong")
+		sock.sendMessage("pong")
 	if msg == "play":	
 		speaker.playFrequency("A4")
 	if msg == "servo":	
@@ -42,7 +42,7 @@ def excecuteCommand(msg):
 		speaker.stop()
 	if msg == "kys":
 	    sock.shutDown()
-	    break
+	    
 
 excecute = Thread(target = excecuteCommand, args = ())
 
