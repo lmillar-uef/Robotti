@@ -46,7 +46,6 @@ def excecuteCommand(in_q):
 		speaker.stop()
 	if msg == "kys":
 	    sock.shutDown()
-	    break
 	    
 def listenForCommand(out_q):
     while True:
