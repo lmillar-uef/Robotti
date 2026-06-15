@@ -35,5 +35,7 @@ while True:
 		speaker.playFrequency("A4")
 	if msg == "stop":		
 		speaker.stop()
+	if msg == "shutdown":
+	    sock.shutdown()
 	
 

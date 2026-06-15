@@ -5,7 +5,7 @@ from threading import Thread
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-s.bind(('0.0.0.0', 5404))
+s.bind(('0.0.0.0', 5405))
 s.listen()
 print('Server is now running.')
 
