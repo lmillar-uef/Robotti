@@ -22,40 +22,49 @@ servo1_home = 90
 
 
 
+
 def excecuteCommand(in_q):
-    #get message from queue
-    msg = in_q.get()
-    #excecute command
-    if msg == "chase":
-		ledi.theaterChaseRainbow()
-	if msg == "autobots":
-		car.test_car_sonic()
-	if msg == "I love you":
-		ledi.colorWipe((255, 0, 0))
-	if msg == "ping":
-		sock.sendMessage("pong")
-	if msg == "play":	
-		speaker.playFrequency("A4")
-	if msg == "servo":	
-		servo.setServoAngle('0', 50)
-		servo.setServoAngle('1', 70) 
-		time.sleep(2)
-		servo.setServoAngle('0', servo0_home)
-		servo.setServoAngle('1', servo1_home)  
-	if msg == "stop":		
-		speaker.stop()
-	if msg == "kys":
-	    sock.shutDown()
+	while True:
+		print("getting mesage...")
+		#get message from queue
+		msg = in_q.get()
+		print("got.")
+		#excecute command
+		if msg == "chase":
+			ledi.theaterChaseRainbow()
+		if msg == "autobots":
+			car.test_car_sonic()
+		if msg == "I love you":
+			ledi.colorWipe((255, 0, 0))
+		if msg == "ping":
+			sock.sendMessage("pong")
+		if msg == "play":	
+			speaker.playFrequency("A4")
+		if msg == "servo":	
+			servo.setServoAngle('0', 50)
+			servo.setServoAngle('1', 70) 
+			time.sleep(2)
+			servo.setServoAngle('0', servo0_home)
+			servo.setServoAngle('1', servo1_home)  
+		if msg == "stop":		
+			speaker.stop()
+		if msg == "kys":
+			sock.shutDown()
+			break
+		print("exceuted")
+		in_q.task_done()
+    
 	    
 def listenForCommand(out_q):
-    while True:
-	    print("Listening...")
-	    ledi.colorWipe((0, 255, 0))
-	    msg = sock.listenSock()
-	    print(msg)
-	    ##put msg in queue for excecution
-	    out_q.put(msg)
-	    out_q.put(_sentinel)
+	while True:
+		print("Listening...")
+		#ledi.colorWipe((0, 255, 0))
+		msg = sock.listenSock()
+		print(msg)
+		##put msg in queue for excecution
+		out_q.put(msg)
+		if msg == "kys":
+			break #bomboclat
 
 
 ##CONNECTION
@@ -70,8 +79,10 @@ while connected == False:
 enderChest = Queue()
 excecute = Thread(target = excecuteCommand, args = (enderChest,))
 listen = Thread(target = listenForCommand, args = (enderChest,))
-excecute.start()
 listen.start()
+excecute.start()
+
+enderChest.join()
 
 
 	

@@ -2,7 +2,7 @@ import socket
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-def connectSock(ip = "10.239.227.76", port = 6765):
+def connectSock(ip = "10.239.227.76", port = 7548):
     s.connect((ip, port))
     
 def sendMessage(msg):
@@ -15,3 +15,5 @@ def listenSock():
 def shutDown():
     s.shutdown(socket.SHUT_RDWR)
     s.close()
+    print("shutdown")
+    
