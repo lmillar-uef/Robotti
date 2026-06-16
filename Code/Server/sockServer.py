@@ -2,18 +2,24 @@ import socket
 import time
 from threading import Timer
 from threading import Thread
+from threading import Lock
+
+##Don't send data at the same time from different threads
+send_lock = Lock()
 
 def connect():
     clientSocket, address = s.accept()
-    clientSocket.sendall(bytes("connected\n", "utf-8"))
+    with send_lock:
+        clientSocket.sendall(bytes("connected\n", "utf-8"))
     return clientSocket, address
     
 def send():
     while True:
         msg = input("Send message:") + "\n"
-        clientSocket.sendall(bytes(msg, "utf-8"))
+        with send_lock:
+            clientSocket.sendall(bytes(msg, "utf-8"))
 
-def listen(clientSocket):
+def listen():
     while True:
         data = clientSocket.recv(1024)
         if not data:
@@ -32,21 +38,15 @@ print('Server is now running.')
 clientSocket, address = connect()
 print(f"Connection from {address} has been established.")
 
-listener_thread = Thread(target=listen, args=(clientSocket,), daemon=True)
+listener_thread = Thread(target=listen, daemon=True)
+sender_thread   = Thread(target=send, daemon=True)
 
     
 try:
     listener_thread.start()
-    send(clientSocket)
+    sender_thread.start()
     while True:
         clientSocket, address = connect()
-        
-        #listener_thread.start()
-        background_controller()
-        listen()
-        
-    
-    
 except KeyboardInterrupt:
     pass
 finally:
