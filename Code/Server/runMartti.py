@@ -16,6 +16,7 @@ from queue import Queue
 
 connected = False
 speaker=speakerGpio.Speaker()
+motor = motor.tankMotor()
 servo = servo.Servo()
 servo0_home = 90
 servo1_home = 90
@@ -49,14 +50,15 @@ def excecuteCommand(in_q):
 			servo.setServoAngle('1', servo1_home)  
 		if msg == "stop":		
 			speaker.stop()
+			motor.setMotorModel(0,0)
 		if msg == "go forwards":
-			pass
+			 motor.setMotorModel(750, 750)
 		if msg == "go backwards":
-			pass
+			 motor.setMotorModel(-750, -750)
 		if msg == "turn left":
-			pass
+			motor.setMotorModel(-750, 750)
 		if msg == "turn right":
-			pass
+			motor.setMotorModel(750, -750)
 		if msg == "off":
 			sock.shutDown()
 			break
