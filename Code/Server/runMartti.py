@@ -20,6 +20,7 @@ motor = motor.tankMotor()
 servo = servo.Servo()
 servo0_home = 90
 servo1_home = 90
+motor_speed = 1000
 
 
 
@@ -52,13 +53,13 @@ def excecuteCommand(in_q):
 			speaker.stop()
 			motor.setMotorModel(0,0)
 		if msg == "go forwards":
-			 motor.setMotorModel(750, 750)
+			 motor.setMotorModel(motor_speed, motor)
 		if msg == "go backwards":
-			 motor.setMotorModel(-750, -750)
+			 motor.setMotorModel(-motor_speed, -motor_speed)
 		if msg == "turn left":
-			motor.setMotorModel(-750, 750)
+			motor.setMotorModel(-motor_speed, motor_speed)
 		if msg == "turn right":
-			motor.setMotorModel(750, -750)
+			motor.setMotorModel(motor_speed, -motor_speed)
 		if msg == "off":
 			sock.shutDown()
 			break
