@@ -12,35 +12,43 @@ import car
 from queue import Queue
 
 
-motorCommands = ["autobots", "go forwards", "go backwards", "turn left", "turn right", "stop"]
-ledCommands = ["I love you", "flash", "stop"]
-servoCommands = ["servo", "stop"]
-speakerCommands = ["play", "stop"]
+motorCommands   = ["autobots", "go forwards", "go backwards", "turn left", "turn right"]
+ledCommands     = ["I love you", "flash"]
+servoCommands   = ["servo"]
+speakerCommands = ["play"]
+eventCommands   = ["stop", "start", "off"]
+
+unpaused_event  = threading.Event() ##basically pause
+off_event   = threading.Event()
 
 connected = False
-speaker=speakerGpio.Speaker()
-servo = servo.Servo()
-servo0_home = 90
-servo1_home = 90
+speaker   = speakerGpio.Speaker()
+servo     = servo.Servo()
 
 
 ##LISTENING
 def listenForCommand(out_q):
 	while True:
 		print("Listening...")
-		#ledi.colorWipe((0, 255, 0))
 		msg = sock.listenSock()
 		print(msg)
-		##put msg in queue for excecution
-		out_q.put(msg)
-		if msg == "kys":
-			break #bomboclat
+		if msg == "stop" or msg == "pause":
+		    unpause_event.clear()
+		else:
+		    unpause_event.set()
+		    ##put msg in queue for excecution
+		    out_q.put(msg)
+		    if msg == "off":
+			    break #bomboclat
+		
 
 
 
 ##EXCECUTING
 def excecuteCommand(in_q, q_mot, q_spe, q_ser, q_led):
 	while True:
+		unpaused_event.wait() ##Stops here if unpaused event is cleared
+		
 		#get message from queue
 		msg = in_q.get()
 		
@@ -53,13 +61,15 @@ def excecuteCommand(in_q, q_mot, q_spe, q_ser, q_led):
 		    q_ser.put(msg)
 		if msg in ledCommands:
 		    q_led.put(msg)
-		    	
+		    
 		#excecute in this thread
 		if msg == "ping":
 			sock.sendMessage("pong")
 		if msg == "off":
 			sock.shutDown()
 			break
+			
+		#mark as done
 		in_q.task_done()
 
 
@@ -81,9 +91,9 @@ def servoCommand(cmd):
 		servo.setServoAngle('0', 50)
 		servo.setServoAngle('1', 70) 
 		time.sleep(2)
-		servo.setServoAngle('0', servo0_home)
-		servo.setServoAngle('1', servo1_home)  
-		
+		servo.setServoAngle('0', servo.init0_angle)
+		servo.setServoAngle('1', servo.init1_angle)  
+	
 def speakerCommand(cmd):
     msg = cmd.get()
     if msg == "play":	
@@ -111,7 +121,7 @@ q_spe = Queue()
 
 ##Different threads for listening, excecuting (+motor, servo, leds, speaker)
 excecute = Thread(target = excecuteCommand, args = (q_com,))
-listen = Thread(target = listenForCommand, args = (q_com, q_mot, q_spe, q_ser, q_led))
+listen   = Thread(target = listenForCommand, args = (q_com, q_mot, q_spe, q_ser, q_led))
 
 motor   = Thread(target = motorCommand, args = (q_mot,))
 speaker = Thread(target = speakerCommand, args = (q_spe,))
@@ -125,6 +135,7 @@ motor.start()
 speaker.start()
 servo.start()
 led.start()
+override.start()
 
 enderChest.join()
 
