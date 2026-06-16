@@ -8,7 +8,7 @@ def connect():
     clientSocket.sendall(bytes("connected\n", "utf-8"))
     return clientSocket, address
     
-def send():
+def send(clientSocket):
     while True:
         msg = input("Send message:") + "\n"
         clientSocket.sendall(bytes(msg, "utf-8"))
@@ -24,7 +24,7 @@ def listen(clientSocket):
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-s.bind(('0.0.0.0', 6751))
+s.bind(('0.0.0.0', 6967))
 s.listen(1)
 
 print('Server is now running.')
