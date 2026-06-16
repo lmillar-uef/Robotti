@@ -2,18 +2,17 @@ import socket
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-def connectSock(ip = "10.239.227.76", port = 6719):
+def connectSock(ip = "10.239.227.76", port = 6751):
     s.connect((ip, port))
     
 def sendMessage(msg):
     print(f"sending: {msg}")
-    s.sendall(bytes(msg, "utf-8"))
+    s.sendall(bytes((msg + "\n"), "utf-8"))
     
 def listenSock():
-    return s.recv(1024).decode("utf-8")
+    return s.recv(1024).decode("utf-8").strip()
 
 def shutDown():
-    s.shutdown(socket.SHUT_RDWR)
     s.close()
     print("shutdown")
     

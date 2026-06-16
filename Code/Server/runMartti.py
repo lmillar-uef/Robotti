@@ -38,9 +38,9 @@ motor_speed = 1400
 ##LISTENING
 def listenForCommand(out_q):
 	while True:
-		#print("Listening...")
+		print("Listening...")
 		msg = sock.listenSock()
-		#print(msg)
+		print(msg)
 		if msg == "stop" or msg == "pause":
 			#print("pausing...")
 			unpaused_event.clear()
