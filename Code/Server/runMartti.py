@@ -17,6 +17,7 @@ motorCommands   = ["off", "autobots", "go forwards", "go backwards", "turn left"
 ledCommands     = ["off", "I love you", "flash"]
 servoCommands   = ["off", "servo"]
 speakerCommands = ["off", "play"]
+overrideCommands= ["off"]
 #eventCommands   = ["stop", "start", "off", "pause"]
 
 unpaused_event  = Event() ##basically pause
@@ -60,7 +61,7 @@ def listenForCommand(out_q):
 
 
 ##EXCECUTING
-def excecuteCommand(in_q, q_mot, q_spe, q_ser, q_led):
+def excecuteCommand(in_q, q_mot, q_spe, q_ser, q_led, q_override):
 	while True:
 		unpaused_event.wait() ##Stops here if unpaused event is cleared
 		
@@ -76,6 +77,8 @@ def excecuteCommand(in_q, q_mot, q_spe, q_ser, q_led):
 		    q_ser.put(msg)
 		if msg in ledCommands:
 		    q_led.put(msg)
+		if msg in overrideCommands:
+		    q_override.put(msg)
 		    
 		#excecute in this thread
 		if msg == "ping":
@@ -175,7 +178,7 @@ q_spe = Queue()
 q_override = Queue()
 
 ##Different threads for listening, excecuting (+motor, servo, leds, speaker)
-excecute = Thread(target = excecuteCommand, args = (q_com, q_mot, q_spe, q_ser, q_led))
+excecute = Thread(target = excecuteCommand, args = (q_com, q_mot, q_spe, q_ser, q_led, q_override))
 listen   = Thread(target = listenForCommand, args = (q_com,))
 
 motor_t    = Thread(target = motorCommand, args = (q_mot,))
