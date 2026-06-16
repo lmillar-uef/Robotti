@@ -10,7 +10,7 @@ def connect():
     
 def background_controller():
     msg = input("Send message:")
-    clientSocket.send(bytes(msg, "utf-8"))
+    clientSocket.sendall(bytes(msg, "utf-8"))
     Timer(1, background_controller).start()
 
 def listen():
@@ -21,7 +21,7 @@ def listen():
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-s.bind(('0.0.0.0', 7549))
+s.bind(('0.0.0.0', 6719))
 s.listen()
 print('Server is now running.')
 
