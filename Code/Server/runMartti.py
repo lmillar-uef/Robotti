@@ -11,12 +11,13 @@ from threading import Thread
 from threading import Event
 import time
 from queue import Queue
+import music
 
 ## ALL COMMANDS
 motor_commands   = ["off", "autobots", "go forwards", "go backwards", "turn left", "turn right"]
 led_commands     = ["off", "I love you", "flash"]
 servo_commands   = ["off", "servo"]
-speaker_commands = ["off", "play"]
+speaker_commands = ["off", "play", "play no surprises", "execute order 66"]
 override_commands= ["off", "stop", "pause"]
 
 ## initialise lists
@@ -27,6 +28,8 @@ unpaused_event  = Event() #always on (except when you want to pause robot)
 unpaused_event.set()
 off_event       = Event() 
 sonic_mode_event = Event()
+play_no_surprises_event = Event()
+play_imperial_march_event = Event()
 
 ## make instances of devices
 speaker   = Speaker()
@@ -40,6 +43,7 @@ connected = False
 servo0_home = 90
 servo1_home = 90
 motor_speed = 1400
+music_index = 0
 
 
 
@@ -50,7 +54,7 @@ motor_speed = 1400
 def listenForCommand(out_q):
 	while True:
 		print("Listening...")
-		msg = sock.listenSock()
+		msg = sock.listenSock()music_index = 0
 		print(msg)
 
 		#event to tell if robot needs to stop everything it is doing
@@ -130,7 +134,13 @@ def carCommand():
 			break
 		unpaused_event.wait()
 		if sonic_mode_event.is_set():
-			car.mode_ultrasonic()	
+			car.mode_ultrasonic()
+		if play_no_surprises_event.is_set():
+		    music.playSong(speaker, music.no_surprises, music_index, music.no_surprises_bpm)
+		    music_index += 1
+		if play_imperial_march_event.is_set():
+		    music.playSong(speaker, music.imperial_march, music_index, music.imperial_march_bpm)
+		    music_index += 1
 		
 def ledCommand(cmd):
 	while True:
@@ -164,6 +174,12 @@ def speakerCommand(cmd):
 		msg = cmd.get()
 		if msg == "play":	
 			speaker.playFrequency("A4")
+		if msg == "play no surprises":	
+		    music_index = 0
+			play_no_surprises_event.set()			
+		if msg == "execute order 66":	
+		    music_index = 0
+			play_imperial_march_event.set()
 		if msg == "stop":		
 			speaker.stop()
 		if msg == "off":
@@ -177,6 +193,8 @@ def overrideCommand(cmd):
 		if msg == "stop" or msg == "pause:
 			#speaker
 			speaker.stop()
+			play_no_surprises_event.clear()
+			play_imperial_march.clear()
 			#motor
 			motor.setMotorModel(0,0)
 			#led
