@@ -32,7 +32,7 @@ speaker   = Speaker()
 motor     = tankMotor()
 servo     = Servo()
 led       = Led()
-car       = Car()
+car       = Car(servo, motor)
 
 ## setting default values
 connected = False
@@ -174,7 +174,7 @@ def speakerCommand(cmd):
 def overrideCommand(cmd):
 	while True:
 		msg = cmd.get()
-		if msg == "stop" or msg == "pause:
+		if msg == "stop" or msg == "pause":
 			#speaker
 			speaker.stop()
 			#motor
@@ -192,7 +192,7 @@ def overrideCommand(cmd):
 
 ##CONNECTION
 while connected == False:
-	connected = sock.connectSock() ### Jetson send "connectd" -> connected True
+	connected = sock.connectSock() ### Jetson send "connected" -> connected True
 	if sock.listenSock() == "connected":
 		connected = True
 		
