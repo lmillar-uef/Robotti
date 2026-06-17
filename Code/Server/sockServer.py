@@ -13,7 +13,7 @@ def connect():
         clientSocket.sendall(bytes("connected\n", "utf-8"))
     return clientSocket, address
     
-def send(clientSocket):
+def send():
     while True:
         msg = input("Send message:") + "\n"
         with send_lock:
@@ -30,7 +30,7 @@ def listen():
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-s.bind(('0.0.0.0', 6967))
+s.bind(('0.0.0.0', 6966))
 s.listen(1)
 
 print('Server is now running.')
