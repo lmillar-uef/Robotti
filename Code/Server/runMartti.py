@@ -11,7 +11,7 @@ from threading import Thread
 from threading import Event
 import time
 from queue import Queue
-import music
+from music import Music
 
 ## ALL COMMANDS
 motor_commands   = ["off", "autobots", "go forwards", "go backwards", "turn left", "turn right"]
@@ -37,13 +37,14 @@ motor     = tankMotor()
 servo     = Servo()
 led       = Led()
 car       = Car(servo, motor)
+music     = Music()
 
 ## setting default values
 connected = False
 servo0_home = 90
 servo1_home = 90
 motor_speed = 1400
-music_index = 0
+music.music_index = 0
 
 
 
@@ -54,7 +55,7 @@ music_index = 0
 def listenForCommand(out_q):
 	while True:
 		print("Listening...")
-		msg = sock.listenSock()music_index = 0
+		msg = sock.listenSock()
 		print(msg)
 
 		#event to tell if robot needs to stop everything it is doing
@@ -136,12 +137,11 @@ def carCommand():
 		if sonic_mode_event.is_set():
 			car.mode_ultrasonic()
 		if play_no_surprises_event.is_set():
-		    music.playSong(speaker, music.no_surprises, music_index, music.no_surprises_bpm)
-		    music_index += 1
+		    music.playSong(speaker, music.no_surprises, music.no_surprises_bpm)
+
 		if play_imperial_march_event.is_set():
-		    music.playSong(speaker, music.imperial_march, music_index, music.imperial_march_bpm)
-		    music_index += 1
-		
+		    music.playSong(speaker, music.imperial_march, music.imperial_march_bpm)
+		   		
 def ledCommand(cmd):
 	while True:
 		#print("l..")
@@ -175,10 +175,12 @@ def speakerCommand(cmd):
 		if msg == "play":	
 			speaker.playFrequency("A4")
 		if msg == "play no surprises":	
-		    music_index = 0
-			play_no_surprises_event.set()			
+			music.music_index = 0
+			play_imperial_march_event.clear()	
+			play_no_surprises_event.set()	
 		if msg == "execute order 66":	
-		    music_index = 0
+			music.music_index = 0
+			play_no_surprises_event.clear()
 			play_imperial_march_event.set()
 		if msg == "stop":		
 			speaker.stop()
@@ -194,7 +196,7 @@ def overrideCommand(cmd):
 			#speaker
 			speaker.stop()
 			play_no_surprises_event.clear()
-			play_imperial_march.clear()
+			play_imperial_march_event.clear()
 			#motor
 			motor.setMotorModel(0,0)
 			#led
