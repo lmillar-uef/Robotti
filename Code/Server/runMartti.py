@@ -12,6 +12,11 @@ from threading import Event
 import time
 from queue import Queue
 from music import Music
+import sys
+
+## Importing the speech to text code
+sys.path.append('/voice-robot/')
+import actualrealtime_stt2
 
 ## ALL COMMANDS
 motor_commands   = ["off", "autobots", "go forwards", "go backwards", "turn left", "turn right"]
