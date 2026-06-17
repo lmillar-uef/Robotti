@@ -26,6 +26,7 @@ threads = []
 unpaused_event  = Event() #always on (except when you want to pause robot)
 unpaused_event.set()
 off_event       = Event() 
+sonic_mode_event = Event()
 
 ## make instances of devices
 speaker   = Speaker()
@@ -36,7 +37,6 @@ car       = Car(servo, motor)
 
 ## setting default values
 connected = False
-sonic_mode = False
 servo0_home = 90
 servo1_home = 90
 motor_speed = 1400
@@ -110,7 +110,7 @@ def motorCommand(cmd):
 		#print("m...")
 		msg = cmd.get()
 		if msg == "autobots":
-			sonic_mode = True
+			sonic_mode_event.set()
 		if msg == "go forwards":
 			motor.setMotorModel(motor_speed, motor_speed)
 		if msg == "go backwards":
@@ -129,7 +129,7 @@ def carCommand():
 			car.close()
 			break
 		unpaused_event.wait()
-		if sonic_mode == True:
+		if sonic_mode_event.is_set():
 			car.mode_ultrasonic()	
 		
 def ledCommand(cmd):
@@ -182,6 +182,7 @@ def overrideCommand(cmd):
 			#led
 			led.colorWipe((0, 0, 0))
 			#servo command????
+			sonic_mode_event.clear()
 			print("paused")
 		if msg == "off":
 			break	
