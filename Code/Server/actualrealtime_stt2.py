@@ -4,41 +4,22 @@ sys.path.append('/home/martti/Robotti/Code/Server/stt_modules')
 import queue
 import tempfile
 import os
-from   collections import deque
-import numpy       as np
+from collections import deque
+import numpy as np
 import sounddevice as sd
-from   scipy.io.wavfile import write
-from   faster_whisper   import WhisperModel
-import threading
-from   time import sleep
+from scipy.io.wavfile import write
+from faster_whisper import WhisperModel
 
-SAMPLE_RATE = 16000
-BLOCK_MS = 30
-BLOCK_SIZE = int(SAMPLE_RATE * BLOCK_MS / 1000)
 
-BUFFER_SECONDS = 1.5
-
-#Adjust recording start volume
-RMS_THRESHOLD = 500
-#Adjust how much total silence is needed before recording ends
-SILENCE_BLOCKS = 35
-
+command_queue = queue.Queue()
 audio_queue = queue.Queue()
-
-#Load transcription model
-print("Loading Whisper model...")
-model = WhisperModel(
-    "tiny.en", #model (i.e small, small.en, medium...)
-    device="cpu",
-    compute_type="int8"
-)
 
 ############################################
 
 def callback(indata, frames, time, status):
  if status:
   print(status)
-
+ print(indata)
  audio_queue.put(indata.copy())
 
 ############################################
@@ -70,23 +51,42 @@ def handle_command(text):
   print("UNKNOWN COMMAND")
 
 ###########################################
-
-print("Always listening...")
-
-ROLLING_BLOCKS = int(
- BUFFER_SECONDS * SAMPLE_RATE / BLOCK_SIZE
-)
-
-rolling_buffer = deque(maxlen=ROLLING_BLOCKS)
-InputStream = sd.InputStream(
- samplerate=SAMPLE_RATE,
- channels=1,
- dtype="int16",
- blocksize=BLOCK_SIZE,
- callback=callback
-)
+def transcribe(q):
+ #Load transcription model
+ print("Loading Whisper model...")
+ model = WhisperModel(
+     "tiny.en", #model (i.e small, small.en, medium...)
+     device="cpu",
+     compute_type="int8"
+ )
  
-if __name__ == "__main__":
+ #Config values
+
+ SAMPLE_RATE = 16000
+ BLOCK_MS = 30
+ BLOCK_SIZE = int(SAMPLE_RATE * BLOCK_MS / 1000)
+
+#Amount of recording in buffer
+ BUFFER_SECONDS = 1.5
+
+ #Adjust recording start volume
+ RMS_THRESHOLD = 500
+ #Adjust how much total silence is needed before recording ends
+ SILENCE_BLOCKS = 35
+ print("Always listening...")
+
+ ROLLING_BLOCKS = int(
+  BUFFER_SECONDS * SAMPLE_RATE / BLOCK_SIZE
+ )
+
+ rolling_buffer = deque(maxlen=ROLLING_BLOCKS)
+ InputStream = sd.InputStream(
+  samplerate=SAMPLE_RATE,
+  channels=1,
+  dtype="int16",
+  blocksize=BLOCK_SIZE,
+  callback=callback
+ )
  with InputStream:
 
   recording = False
@@ -135,25 +135,13 @@ if __name__ == "__main__":
       axis=0
      )
 
-     temp_path = None
-
+     audio = audio.flatten().astype(np.float32)
+     audio /= 32768.0
+    
      try:
 
-      with tempfile.NamedTemporaryFile(
-       suffix=".wav",
-       delete=False
-      ) as f:
-
-       temp_path = f.name
-
-      write(
-       temp_path,
-       SAMPLE_RATE,
-       audio
-      )
-
       segments, info = model.transcribe(
-       temp_path,
+       audio,
        language="en",
        beam_size=5,
        vad_filter=True,
@@ -171,20 +159,19 @@ if __name__ == "__main__":
 
        print("Heard:", text)
 
-       handle_command(text)
-
+       command_queue.put(text)
+    
       else:
-
+      
        print("No speech recognized.")
 
      except Exception as e:
 
       print("Error:", e)
 
-     finally:
-
-      if temp_path and os.path.exists(temp_path):
-       os.remove(temp_path)
-
      speech_buffer = []
      silence_count = 0
+     
+transcribe(command_queue)
+     
+     

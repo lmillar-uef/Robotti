@@ -15,7 +15,7 @@ from music import Music
 
 
 ## ALL COMMANDS
-motor_commands   = ["off", "autobots", "go forwards", "go backwards", "turn left", "turn right"]
+motor_commands   = ["off", "autobots", "go forwards", "go backwards", "turn left", "turn right", "dance"]
 led_commands     = ["off", "I love you", "flash"]
 servo_commands   = ["off", "servo"]
 speaker_commands = ["off", "play", "play no surprises", "execute order 66"]
@@ -31,6 +31,7 @@ off_event       = Event()
 sonic_mode_event = Event()
 play_no_surprises_event = Event()
 play_imperial_march_event = Event()
+dance_event = Event()
 
 ## make instances of devices
 speaker   = Speaker()
@@ -44,7 +45,8 @@ music     = Music()
 connected = False
 servo0_home = 90
 servo1_home = 90
-motor_speed = 1400
+motor_speed = 1300
+turn_time = 2
 music.music_index = 0
 
 
@@ -117,19 +119,25 @@ def motorCommand(cmd):
 		msg = cmd.get()
 		if msg == "autobots":
 			sonic_mode_event.set()
+		if msg == "dance":
+			dance_event.set()
 		if msg == "go forwards":
 			motor.setMotorModel(motor_speed, motor_speed)
 		if msg == "go backwards":
 			motor.setMotorModel(-motor_speed, -motor_speed)
 		if msg == "turn left":
 			motor.setMotorModel(-motor_speed, motor_speed)
+			time.sleep(turn_time)
+			motor.setMotorModel(0, 0)
 		if msg == "turn right":
 			motor.setMotorModel(motor_speed, -motor_speed)
+			time.sleep(turn_time)
+			motor.setMotorModel(0, 0)
 		if msg == "off":
 			break
 		cmd.task_done()
 		
-def carCommand():
+def modeCommand():
 	while True:
 		if off_event.is_set():
 			car.close()
@@ -139,9 +147,10 @@ def carCommand():
 			car.mode_ultrasonic()
 		if play_no_surprises_event.is_set():
 		    music.playSong(speaker, music.no_surprises, music.no_surprises_bpm)
-
 		if play_imperial_march_event.is_set():
 		    music.playSong(speaker, music.imperial_march, music.imperial_march_bpm)
+		if dance_even.is_set():
+		    car.mode_dance()
 		   		
 def ledCommand(cmd):
 	while True:
@@ -235,7 +244,7 @@ threads.append(Thread(target = motorCommand, args = (q_mot,)))                  
 threads.append(Thread(target = speakerCommand, args = (q_spe,)))                                          #speaker command excecutor
 threads.append(Thread(target = servoCommand, args = (q_ser,)))                                            #servo command excecutor
 threads.append(Thread(target = ledCommand, args = (q_led,)))                                              #led command excecutor
-threads.append(Thread(target = carCommand))                                                               #car/preset modes excecutor
+threads.append(Thread(target = modeCommand))                                                               #car/preset modes excecutor
 
 threads.append(Thread(target = overrideCommand, args = (q_override,)))                                    #overall overriding command excecutor
 
