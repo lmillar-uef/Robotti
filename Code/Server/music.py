@@ -21,11 +21,28 @@ class Music():
                 ["F4", 0.75],
                 ["C5", 0.25],
                 ["A4", 2]]
-                #no_surprises = [[note, dur],
-                #   [note, dur]]
-             
+                self.no_surprises = [["A5", 0.5],
+                ["C5", 0.5],
+                ["F5", 0.5],
+                ["C5", 0.5],
+                
+                ["A5", 0.5],
+                ["C5", 0.5],
+                ["F5", 0.5],
+                ["C5", 0.5],
+                
+                ["A5", 0.5],
+                ["C5", 0.5],
+                ["F5", 0.5],
+                ["C5", 0.5],
+                
+                ["Bb4", 0.5],
+                ["Db5", 0.5],
+                ["F5", 0.5],
+                ["G5", 0.5]]
+                
                 self.imperial_march_bpm = 100
-                self.no_surprises_bpm = 100
+                self.no_surprises_bpm = 67
                 
                 self.music_index = 0
 
