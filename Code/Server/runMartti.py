@@ -13,6 +13,7 @@ import time
 from queue import Queue
 from music import Music
 
+
 ## ALL COMMANDS
 motor_commands   = ["off", "autobots", "go forwards", "go backwards", "turn left", "turn right"]
 led_commands     = ["off", "I love you", "flash"]
@@ -227,7 +228,7 @@ q_spe = Queue()  #speaker specific
 q_override = Queue()  #commands that need to override everything, for ex. "off" or "pause"
 
 ##Different threads for listening, excecuting (+motor, servo, leds, speaker)
-threads.append(Thread(target = listenForCommand, args = (q_com,)))                                        #listening for incoming commands
+threads.append(Thread(target = listenForCommand, args = (q_com,)))                                        #listening for incoming commands from TERMINAL
 threads.append(Thread(target = excecuteCommand, args = (q_com, q_mot, q_spe, q_ser, q_led, q_override)))  #delegating commands to respective excecutor threads
 
 threads.append(Thread(target = motorCommand, args = (q_mot,)))                                            #motor command excecutor
