@@ -4,6 +4,13 @@ from threading import Timer
 from threading import Thread
 from threading import Lock
 
+import sys
+
+sys.path.append('/stt_modules/')
+
+import actualrealtime_stt2 as stt
+
+
 ##Don't send data at the same time from different threads
 send_lock = Lock()
 
