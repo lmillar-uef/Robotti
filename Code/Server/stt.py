@@ -4,6 +4,7 @@ import time
 import sounddevice as sd
 from faster_whisper import WhisperModel
 from collections import deque
+import threading
 
 # AUDIO SETTINGS
 SAMPLE_RATE = 16000
@@ -20,7 +21,7 @@ WAIT_SECONDS = 1
 
 # shared audio buffer
 audio_buffer = deque(maxlen=MAX_SAMPLES)
-buffer_lock = threading.lock()  #only one thread at a time can access buffer
+buffer_lock = threading.Lock()  #only one thread at a time can access buffer
 
 # whisper model
 model = WhisperModel(
