@@ -16,22 +16,23 @@ from music import Music
 
 ## ALL COMMANDS
 motor_commands   = ["off", "autobots", "go forwards", "go backwards", "turn left", "turn right", "dance"]
-led_commands     = ["off", "I love you", "flash"]
+led_commands     = ["off", "i love you", "flash"]
 servo_commands   = ["off", "servo"]
 speaker_commands = ["off", "play", "play no surprises", "execute order 66"]
 override_commands= ["off", "stop", "pause"]
 
 ## initialise lists
 threads = []
+unused_words = ""
 
 ## events used
-unpaused_event  = Event() #always on (except when you want to pause robot)
+unpaused_event            = Event() #always on (except when you want to pause robot)
 unpaused_event.set()
-off_event       = Event() 
-sonic_mode_event = Event()
-play_no_surprises_event = Event()
+off_event                 = Event() 
+sonic_mode_event          = Event()
+play_no_surprises_event   = Event()
 play_imperial_march_event = Event()
-dance_event = Event()
+dance_event               = Event()
 
 ## make instances of devices
 speaker   = Speaker()
@@ -42,11 +43,11 @@ car       = Car(servo, motor)
 music     = Music()
 
 ## setting default values
-connected = False
+connected   = False
 servo0_home = 90
 servo1_home = 90
 motor_speed = 1300
-turn_time = 2
+turn_time   = 2
 music.music_index = 0
 
 
@@ -60,11 +61,14 @@ def listenForCommand(out_q):
 		print("Listening...")
 		msg = sock.listenSock()
 		print(msg)
+		unused_words += f"{msg} "
 
 		#event to tell if robot needs to stop everything it is doing
 		if msg == "stop" or msg == "pause":
 			print("pausing...")
 			unpaused_event.clear()
+			unused_words.remove("stop")
+			unused_words.remove("pause")
 		elif not unpaused_event.is_set():
 			unpaused_event.set()
 		
@@ -74,7 +78,8 @@ def listenForCommand(out_q):
 		if msg == "off":
 			off_event.set()
 			break 
-		
+
+# make function for searching if unused words has a command and puts it in the queue (right now works only for single word commands which is not good...
 
 ############################################################################
 
@@ -158,7 +163,7 @@ def ledCommand(cmd):
 		msg = cmd.get()
 		if msg == "flash":
 			led.theaterChaseRainbow()
-		if msg == "I love you":
+		if msg == "i love you":
 			led.colorWipe((255, 0, 0))
 		if msg == "off":
 			break
@@ -211,7 +216,8 @@ def overrideCommand(cmd):
 			motor.setMotorModel(0,0)
 			#led
 			led.colorWipe((0, 0, 0))
-			#servo command????
+			#servo command???? (not made) !! use servo.angle to get current angle (i think)
+			#car modes
 			sonic_mode_event.clear()
 			print("paused")
 		if msg == "off":
