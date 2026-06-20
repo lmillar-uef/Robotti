@@ -1,24 +1,25 @@
-from servo import Servo
-from motor import tankMotor
-from led import Led
+from servo       import Servo
+from motor       import tankMotor
+from led         import Led
 from speakerGpio import Speaker
-from car import Car
+from car         import Car
+from music       import Music
 import ultrasonic
 #import infrared
 #import camera
 import sockClient as sock
-from threading import Thread
-from threading import Event
+from   threading import Thread
+from   threading import Event
 import time
-from queue import Queue
-from music import Music
+from   queue import Queue
+
 
 
 ## ALL COMMANDS
 motor_commands   = ["off", "autobots", "go forwards", "go backwards", "turn left", "turn right", "dance"]
 led_commands     = ["off", "i love you", "flash"]
 servo_commands   = ["off", "servo"]
-speaker_commands = ["off", "play", "play no surprises", "execute order 66"]
+speaker_commands = ["off", "play no surprises", "play", "execute order 66"]
 override_commands= ["off", "stop", "pause"]
 
 ## initialise lists
@@ -48,6 +49,7 @@ servo0_home = 90
 servo1_home = 90
 motor_speed = 1300
 turn_time   = 2
+command_memory    = 5
 music.music_index = 0
 
 
@@ -61,14 +63,11 @@ def listenForCommand(out_q):
 		print("Listening...")
 		msg = sock.listenSock()
 		print(msg)
-		unused_words += f"{msg} "
 
 		#event to tell if robot needs to stop everything it is doing
 		if msg == "stop" or msg == "pause":
 			print("pausing...")
 			unpaused_event.clear()
-			unused_words.remove("stop")
-			unused_words.remove("pause")
 		elif not unpaused_event.is_set():
 			unpaused_event.set()
 		
@@ -86,24 +85,35 @@ def listenForCommand(out_q):
 
 ##EXCECUTING
 def excecuteCommand(in_q, q_mot, q_spe, q_ser, q_led, q_override):
+	unused_words = ""
 	while True:
 		#get message from queue
 		msg = in_q.get()
-		
-		if msg in override_commands:
-		    q_override.put(msg)
+		unused_words += f"{msg} "
+
+		for command in override_commands:
+			if command in unused_words:
+				q_override.put(command)
 		
 		unpaused_event.wait() ##Stops here if unpaused event is cleared 
 	
 		#send command to the right thread
-		if msg in motor_commands:
-		    q_mot.put(msg)
-		if msg in speaker_commands:
-		    q_spe.put(msg)
-		if msg in servo_commands:
-		    q_ser.put(msg)
-		if msg in led_commands:
-		    q_led.put(msg)
+		for command in motor_commands:
+			if command in unused_words:
+				q_mot.put(command)
+				unused_words.replace(f"{command} ", '')
+		for command in speaker_commands:
+			if command in unused_words:
+				q_spe.put(command)
+				unused_words.replace(f"{command} ", '')
+		for command in servo_commands:
+			if command in unused_words:
+				q_ser.put(command)
+				unused_words.replace(f"{command} ", '')
+		for command in led_commands:
+			if command in unused_words:
+				q_led.put(command)
+				unused_words.replace(f"{command} ", '')
 		
 		    
 		#excecute in this thread
@@ -112,6 +122,10 @@ def excecuteCommand(in_q, q_mot, q_spe, q_ser, q_led, q_override):
 		if msg == "off":
 			sock.shutDown()
 			break
+
+		#unused_words may become quite long. If longer than set length, remove first word
+		if len(unused_words.split()) > command_memory:
+			_, _, unused_words = unused_words.partition(" ")
 			
 		#mark as done
 		in_q.task_done()
