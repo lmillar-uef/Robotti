@@ -16,7 +16,7 @@ from   queue import Queue
 
 
 ## ALL COMMANDS
-motor_commands   = ["off", "autobots", "go forwards", "go backwards", "turn left", "turn right", "dance"]
+motor_commands   = ["off", "sonic mode", "go forwards", "go backwards", "turn left", "turn right", "dance"]
 led_commands     = ["off", "i love you", "flash"]
 servo_commands   = ["off", "servo"]
 speaker_commands = ["off", "play no surprises", "play", "execute order 66"]
