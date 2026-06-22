@@ -107,6 +107,7 @@ class Music():
                 self.robot_sounds = [happy_sound,sad_sound]
                 self.imperial_march_bpm = 100
                 self.no_surprises_bpm = 67
+                self.happy_sound_bpm = 80
                 
                 self.music_index = 0
 
@@ -121,5 +122,10 @@ class Music():
                 time.sleep(0.05)
                 
         def playSound(self, speaker, index, bpm):
-                pass
-                
+                if self.music_index >= len(self.robot_sounds[index]):
+                        return
+                speaker.playFrequency(self.robot_sounds[index][self.music_index][0])
+                time.sleep(self.robot_sounds[index][self.music_index][1]*60/bpm)
+                self.music_index += 1
+                speaker.stop()
+                time.sleep(0.05)

@@ -31,6 +31,8 @@ off_event       = Event()
 sonic_mode_event = Event()
 play_no_surprises_event = Event()
 play_imperial_march_event = Event()
+play_happy_sound_event = Event()
+play_sad_sound_event = Event()
 
 ## make instances of devices
 speaker   = Speaker()
@@ -142,6 +144,10 @@ def carCommand():
 
 		if play_imperial_march_event.is_set():
 		    music.playSong(speaker, music.imperial_march, music.imperial_march_bpm)
+		if play_happy_sound_event.is_set():
+			music.playSound(speaker,0,music.happy_sound_bpm)    
+		if play_sad_sound_event.is_set():
+			music.playSound(speaker,1,music.happy_sound_bpm)	
 		   		
 def ledCommand(cmd):
 	while True:
@@ -178,11 +184,28 @@ def speakerCommand(cmd):
 		if msg == "play no surprises":	
 			music.music_index = 0
 			play_imperial_march_event.clear()	
+			play_happy_sound_event.clear()
+			play_sad_sound_event.clear()
 			play_no_surprises_event.set()	
 		if msg == "execute order 66":	
 			music.music_index = 0
 			play_no_surprises_event.clear()
+			play_happy_sound_event.clear()
+			play_sad_sound_event.clear()
 			play_imperial_march_event.set()
+		if msg == "happy" :
+			music.music_index = 0
+			play_no_surprises_event.clear()
+			play_imperial_march_event.clear()
+			play_sad_sound_event.clear()
+			play_happy_sound_event.set()	
+		if msg == "sad" :
+			music.music_index = 0
+			play_no_surprises_event.clear()
+			play_imperial_march_event.clear()
+			play_happy_sound_event.clear()
+			play_sad_sound_event.set()
+			
 		if msg == "stop":		
 			speaker.stop()
 		if msg == "off":
@@ -198,6 +221,8 @@ def overrideCommand(cmd):
 			speaker.stop()
 			play_no_surprises_event.clear()
 			play_imperial_march_event.clear()
+			play_happy_sound_event.clear()
+			play_sad_sound_event.clear()
 			#motor
 			motor.setMotorModel(0,0)
 			#led
