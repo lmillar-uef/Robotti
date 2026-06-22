@@ -15,10 +15,10 @@ from music import Music
 
 
 ## ALL COMMANDS
-motor_commands   = ["off", "autobots", "go forwards", "go backwards", "turn left", "turn right", "dance"]
+motor_commands   = ["off", "ultra", "go forwards", "go backwards", "turn left", "turn right", "dance"]
 led_commands     = ["off", "i love you", "flash"]
 servo_commands   = ["off", "servo"]
-speaker_commands = ["off", "play", "play no surprises", "execute order 66"]
+speaker_commands = ["off", "play", "play no surprises", "execute order 66", "happy", "sad"]
 override_commands= ["off", "stop", "pause"]
 
 ## initialise lists
@@ -49,8 +49,8 @@ music     = Music()
 connected   = False
 servo0_home = 90
 servo1_home = 90
-motor_speed = 1300
-turn_time   = 2
+motor_speed = 2000
+turn_time   = 0.5
 music.music_index = 0
 
 
@@ -99,7 +99,8 @@ def excecuteCommand(in_q, q_mot, q_spe, q_ser, q_led, q_override):
 	
 		#send command to the right thread
 		if msg in motor_commands:
-		    q_mot.put(msg)
+			print("in")
+			q_mot.put(msg)
 		if msg in speaker_commands:
 		    q_spe.put(msg)
 		if msg in servo_commands:
@@ -124,7 +125,9 @@ def motorCommand(cmd):
 	while True:
 		#print("m...")
 		msg = cmd.get()
-		if msg == "autobots":
+		print(msg)
+		if msg == "ultra":
+			print("jes")
 			sonic_mode_event.set()
 		if msg == "dance":
 			dance_event.set()
@@ -163,6 +166,7 @@ def modeCommand():
 			music.playSound(speaker,1,music.happy_sound_bpm)	
 
 		if dance_event.is_set():
+			pass
 
 		   		
 def ledCommand(cmd):
@@ -194,7 +198,8 @@ def servoCommand(cmd):
 def speakerCommand(cmd):
 	while True:
 		#print("sp..")
-		msg = cmd.get()
+		msg = cmd.get()			
+		print("jes")
 		if msg == "play":	
 			speaker.playFrequency("A4")
 		if msg == "play no surprises":	
