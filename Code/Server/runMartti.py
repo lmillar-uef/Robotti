@@ -61,14 +61,13 @@ def listenForCommand(out_q):
 		print("Listening...")
 		msg = sock.listenSock()
 		print(msg)
-		unused_words += f"{msg} "
+
 
 		#event to tell if robot needs to stop everything it is doing
 		if msg == "stop" or msg == "pause":
 			print("pausing...")
 			unpaused_event.clear()
-			unused_words.remove("stop")
-			unused_words.remove("pause")
+
 		elif not unpaused_event.is_set():
 			unpaused_event.set()
 		
@@ -154,7 +153,7 @@ def modeCommand():
 		    music.playSong(speaker, music.no_surprises, music.no_surprises_bpm)
 		if play_imperial_march_event.is_set():
 		    music.playSong(speaker, music.imperial_march, music.imperial_march_bpm)
-		if dance_even.is_set():
+		if dance_event.is_set():
 		    car.mode_dance()
 		   		
 def ledCommand(cmd):
