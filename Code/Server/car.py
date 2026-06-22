@@ -182,6 +182,7 @@ class Car:
             self.mode_clamp_down()
         elif self.clamp_mode == 0:
             self.mode_clamp_stop()
+        
 
 # Test function for clamp functionality
 def test_car_clamp():

@@ -15,22 +15,27 @@ from music import Music
 
 
 ## ALL COMMANDS
-motor_commands   = ["off", "autobots", "go forwards", "go backwards", "turn left", "turn right"]
-led_commands     = ["off", "I love you", "flash"]
+motor_commands   = ["off", "ultra", "go forwards", "go backwards", "turn left", "turn right", "dance"]
+led_commands     = ["off", "i love you", "flash"]
 servo_commands   = ["off", "servo"]
-speaker_commands = ["off", "play", "play no surprises", "execute order 66"]
+speaker_commands = ["off", "play", "play no surprises", "execute order 66", "happy", "sad"]
 override_commands= ["off", "stop", "pause"]
 
 ## initialise lists
 threads = []
+unused_words = ""
 
 ## events used
-unpaused_event  = Event() #always on (except when you want to pause robot)
+unpaused_event            = Event() #always on (except when you want to pause robot)
 unpaused_event.set()
-off_event       = Event() 
-sonic_mode_event = Event()
-play_no_surprises_event = Event()
+off_event                 = Event() 
+sonic_mode_event          = Event()
+play_no_surprises_event   = Event()
 play_imperial_march_event = Event()
+play_happy_sound_event = Event()
+play_sad_sound_event = Event()
+dance_event               = Event()
+
 
 ## make instances of devices
 speaker   = Speaker()
@@ -41,10 +46,11 @@ car       = Car(servo, motor)
 music     = Music()
 
 ## setting default values
-connected = False
+connected   = False
 servo0_home = 90
 servo1_home = 90
-motor_speed = 1400
+motor_speed = 2000
+turn_time   = 0.5
 music.music_index = 0
 
 
@@ -59,10 +65,12 @@ def listenForCommand(out_q):
 		msg = sock.listenSock()
 		print(msg)
 
+
 		#event to tell if robot needs to stop everything it is doing
 		if msg == "stop" or msg == "pause":
 			print("pausing...")
 			unpaused_event.clear()
+
 		elif not unpaused_event.is_set():
 			unpaused_event.set()
 		
@@ -72,7 +80,8 @@ def listenForCommand(out_q):
 		if msg == "off":
 			off_event.set()
 			break 
-		
+
+# make function for searching if unused words has a command and puts it in the queue (right now works only for single word commands which is not good...
 
 ############################################################################
 
@@ -90,7 +99,8 @@ def excecuteCommand(in_q, q_mot, q_spe, q_ser, q_led, q_override):
 	
 		#send command to the right thread
 		if msg in motor_commands:
-		    q_mot.put(msg)
+			print("in")
+			q_mot.put(msg)
 		if msg in speaker_commands:
 		    q_spe.put(msg)
 		if msg in servo_commands:
@@ -115,21 +125,29 @@ def motorCommand(cmd):
 	while True:
 		#print("m...")
 		msg = cmd.get()
-		if msg == "autobots":
+		print(msg)
+		if msg == "ultra":
+			print("jes")
 			sonic_mode_event.set()
+		if msg == "dance":
+			dance_event.set()
 		if msg == "go forwards":
 			motor.setMotorModel(motor_speed, motor_speed)
 		if msg == "go backwards":
 			motor.setMotorModel(-motor_speed, -motor_speed)
 		if msg == "turn left":
 			motor.setMotorModel(-motor_speed, motor_speed)
+			time.sleep(turn_time)
+			motor.setMotorModel(0, 0)
 		if msg == "turn right":
 			motor.setMotorModel(motor_speed, -motor_speed)
+			time.sleep(turn_time)
+			motor.setMotorModel(0, 0)
 		if msg == "off":
 			break
 		cmd.task_done()
 		
-def carCommand():
+def modeCommand():
 	while True:
 		if off_event.is_set():
 			car.close()
@@ -139,9 +157,17 @@ def carCommand():
 			car.mode_ultrasonic()
 		if play_no_surprises_event.is_set():
 		    music.playSong(speaker, music.no_surprises, music.no_surprises_bpm)
-
 		if play_imperial_march_event.is_set():
 		    music.playSong(speaker, music.imperial_march, music.imperial_march_bpm)
+
+		if play_happy_sound_event.is_set():
+			music.playSound(speaker,0,music.happy_sound_bpm)    
+		if play_sad_sound_event.is_set():
+			music.playSound(speaker,1,music.happy_sound_bpm)	
+
+		if dance_event.is_set():
+			pass
+
 		   		
 def ledCommand(cmd):
 	while True:
@@ -149,7 +175,7 @@ def ledCommand(cmd):
 		msg = cmd.get()
 		if msg == "flash":
 			led.theaterChaseRainbow()
-		if msg == "I love you":
+		if msg == "i love you":
 			led.colorWipe((255, 0, 0))
 		if msg == "off":
 			break
@@ -172,17 +198,35 @@ def servoCommand(cmd):
 def speakerCommand(cmd):
 	while True:
 		#print("sp..")
-		msg = cmd.get()
+		msg = cmd.get()			
+		print("jes")
 		if msg == "play":	
 			speaker.playFrequency("A4")
 		if msg == "play no surprises":	
 			music.music_index = 0
 			play_imperial_march_event.clear()	
+			play_happy_sound_event.clear()
+			play_sad_sound_event.clear()
 			play_no_surprises_event.set()	
 		if msg == "execute order 66":	
 			music.music_index = 0
 			play_no_surprises_event.clear()
+			play_happy_sound_event.clear()
+			play_sad_sound_event.clear()
 			play_imperial_march_event.set()
+		if msg == "happy" :
+			music.music_index = 0
+			play_no_surprises_event.clear()
+			play_imperial_march_event.clear()
+			play_sad_sound_event.clear()
+			play_happy_sound_event.set()	
+		if msg == "sad" :
+			music.music_index = 0
+			play_no_surprises_event.clear()
+			play_imperial_march_event.clear()
+			play_happy_sound_event.clear()
+			play_sad_sound_event.set()
+			
 		if msg == "stop":		
 			speaker.stop()
 		if msg == "off":
@@ -198,11 +242,14 @@ def overrideCommand(cmd):
 			speaker.stop()
 			play_no_surprises_event.clear()
 			play_imperial_march_event.clear()
+			play_happy_sound_event.clear()
+			play_sad_sound_event.clear()
 			#motor
 			motor.setMotorModel(0,0)
 			#led
 			led.colorWipe((0, 0, 0))
-			#servo command????
+			#servo command???? (not made) !! use servo.angle to get current angle (i think)
+			#car modes
 			sonic_mode_event.clear()
 			print("paused")
 		if msg == "off":
@@ -235,7 +282,7 @@ threads.append(Thread(target = motorCommand, args = (q_mot,)))                  
 threads.append(Thread(target = speakerCommand, args = (q_spe,)))                                          #speaker command excecutor
 threads.append(Thread(target = servoCommand, args = (q_ser,)))                                            #servo command excecutor
 threads.append(Thread(target = ledCommand, args = (q_led,)))                                              #led command excecutor
-threads.append(Thread(target = carCommand))                                                               #car/preset modes excecutor
+threads.append(Thread(target = modeCommand))                                                               #car/preset modes excecutor
 
 threads.append(Thread(target = overrideCommand, args = (q_override,)))                                    #overall overriding command excecutor
 
