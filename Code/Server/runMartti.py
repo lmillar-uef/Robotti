@@ -15,15 +15,14 @@ from music import Music
 
 
 ## ALL COMMANDS
-motor_commands   = ["off", "autobots", "go forwards", "go backwards", "turn left", "turn right", "dance"]
+motor_commands   = ["off", "avoid", "go forwards", "go forward", "forward", "go backward", "go back", "backward", "back", "go backwards", "turn left", "turn right", "dance"]
 led_commands     = ["off", "i love you", "flash"]
-servo_commands   = ["off", "servo"]
-speaker_commands = ["off", "play", "play no surprises", "execute order 66"]
+servo_commands   = ["off", "claw"]
+speaker_commands = ["off", "play", "happy", "sad",  "play no surprises", "execute order 66", "i love you"]
 override_commands= ["off", "stop", "pause"]
 
 ## initialise lists
 threads = []
-unused_words = ""
 
 ## events used
 unpaused_event            = Event() #always on (except when you want to pause robot)
@@ -32,6 +31,8 @@ off_event                 = Event()
 sonic_mode_event          = Event()
 play_no_surprises_event   = Event()
 play_imperial_march_event = Event()
+play_happy_sound_event = Event()
+play_sad_sound_event = Event()
 dance_event               = Event()
 
 ## make instances of devices
@@ -47,7 +48,7 @@ connected   = False
 servo0_home = 90
 servo1_home = 90
 motor_speed = 1300
-turn_time   = 2
+turn_time   = 0.5
 music.music_index = 0
 
 
@@ -121,13 +122,13 @@ def motorCommand(cmd):
 	while True:
 		#print("m...")
 		msg = cmd.get()
-		if msg == "autobots":
+		if msg == "avoid":
 			sonic_mode_event.set()
 		if msg == "dance":
 			dance_event.set()
-		if msg == "go forwards":
+		if msg == "go forwards" or msg == "go forward" or msg == "forward":
 			motor.setMotorModel(motor_speed, motor_speed)
-		if msg == "go backwards":
+		if msg == "go backwards" or msg == "go backward" or msg == "go back" or msg == "backward" or msg == "back":
 			motor.setMotorModel(-motor_speed, -motor_speed)
 		if msg == "turn left":
 			motor.setMotorModel(-motor_speed, motor_speed)
@@ -153,6 +154,10 @@ def modeCommand():
 		    music.playSong(speaker, music.no_surprises, music.no_surprises_bpm)
 		if play_imperial_march_event.is_set():
 		    music.playSong(speaker, music.imperial_march, music.imperial_march_bpm)
+		if play_sad_sound_event.is_set():
+			music.playSound(speaker, 1, music.happy_sound_bpm)
+		if play_happy_sound_event.is_set():
+			music.playSound(speaker, 0, music.happy_sound_bpm)
 		if dance_event.is_set():
 		    car.mode_dance()
 		   		
@@ -172,7 +177,7 @@ def servoCommand(cmd):
 	while True:
 		#print("s..")
 		msg = cmd.get()
-		if msg == "servo":	
+		if msg == "claw":	
 			servo.setServoAngle('0', 100)
 			servo.setServoAngle('1', 100) 
 			time.sleep(2)
@@ -191,11 +196,27 @@ def speakerCommand(cmd):
 		if msg == "play no surprises":	
 			music.music_index = 0
 			play_imperial_march_event.clear()	
+			play_happy_sound_event.clear()
+			play_sad_sound_event.clear()
 			play_no_surprises_event.set()	
 		if msg == "execute order 66":	
 			music.music_index = 0
 			play_no_surprises_event.clear()
+			play_happy_sound_event.clear()
+			play_sad_sound_event.clear()
 			play_imperial_march_event.set()
+		if msg == "happy" or msg == "i love you":
+			music.music_index = 0
+			play_no_surprises_event.clear()
+			play_happy_sound_event.set()
+			play_sad_sound_event.clear()
+			play_imperial_march_event.clear()
+		if msg == "sad":
+			music.music_index = 0
+			play_no_surprises_event.clear()
+			play_happy_sound_event.clear()
+			play_sad_sound_event.set()
+			play_imperial_march_event.clear()	
 		if msg == "stop":		
 			speaker.stop()
 		if msg == "off":
@@ -211,6 +232,8 @@ def overrideCommand(cmd):
 			speaker.stop()
 			play_no_surprises_event.clear()
 			play_imperial_march_event.clear()
+			play_happy_sound_event.clear()
+			play_sad_sound_event.clear()
 			#motor
 			motor.setMotorModel(0,0)
 			#led
