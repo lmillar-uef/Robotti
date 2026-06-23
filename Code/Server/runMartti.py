@@ -48,7 +48,7 @@ connected   = False
 servo0_home = 90
 servo1_home = 90
 motor_speed = 1300
-turn_time   = 0.5
+turn_time   = 2
 music.music_index = 0
 
 
@@ -192,7 +192,7 @@ def speakerCommand(cmd):
 		#print("sp..")
 		msg = cmd.get()
 		if msg == "play":	
-			speaker.playFrequency("A4")
+			speaker.playFrequency(440)
 		if msg == "play no surprises":	
 			music.music_index = 0
 			play_imperial_march_event.clear()	

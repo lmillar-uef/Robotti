@@ -43,7 +43,7 @@ class Music():
                 ["Gb5", 0.33],
                 ["F5", 0.33],
                 ["Gb5",0.33],
-                [4,0.5],
+                [0,0.5],
                 ["Bb4",0.5],
                 ["Eb5",1],
                 ["D5",0.75],
@@ -51,7 +51,7 @@ class Music():
                 ["C5",0.33],
                 ["B4",0.33],
                 ["C5",0.33],
-                [4,0.5],
+                [0,0.5],
                 ["F4",0.5],
                 ["Ab4",1],
                 ["F4",0.75],
@@ -69,7 +69,7 @@ class Music():
                 ["Gb5", 0.33],
                 ["F5", 0.33],
                 ["Gb5",0.33],
-                [4,0.5],
+                [0,0.5],
                 ["Bb4",0.5],
                 ["Eb5",1.],
                 ["D5",0.75],
@@ -77,12 +77,12 @@ class Music():
                 ["C5",0.33],
                 ["B4",0.33],
                 ["C5",0.33],
-                [4,0.5],
+                [0,0.5],
                 ["F4",0.5],
                 ["Ab4",1],
                 ["F4",0.75],
-                ["Ab4",0.25],
-                ["Ab4",1],
+                ["C5",0.25],
+                ["A4",1],
                 ["F4",0.75],
                 ["C5",0.25],
                 ["A4",2]]
@@ -119,7 +119,10 @@ class Music():
         def playSong(self, speaker, song, bpm):
                 while self.music_index >= len(song):
                         self.music_index -= len(song)
-                speaker.playFrequency(song[self.music_index][0])
+                if song[self.music_index][0] == 0:
+                        speaker.stop()
+                else:
+                        speaker.playFrequency(song[self.music_index][0])
                 time.sleep(song[self.music_index][1]*60/bpm)
                 self.music_index += 1
                 speaker.stop()
@@ -128,7 +131,10 @@ class Music():
         def playSound(self, speaker, index, bpm):
                 if self.music_index >= len(self.robot_sounds[index]):
                         return
-                speaker.playFrequency(self.robot_sounds[index][self.music_index][0])
+                if self.robot_sounds[index][self.music_index][0] == 0:
+                        speaker.stop()
+                else:  
+                        speaker.playFrequency(self.robot_sounds[index][self.music_index][0])
                 time.sleep(self.robot_sounds[index][self.music_index][1]*60/bpm)
                 self.music_index += 1
                 speaker.stop()
