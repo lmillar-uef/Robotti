@@ -17,7 +17,7 @@ from random import randint
 
 ## ALL COMMANDS
 motor_commands   = ["off", "avoid", "go forwards", "go forward", "forward", "go backward", "go back", "backward", "back", "go backwards", "turn left", "turn right", "dance"]
-led_commands     = ["off", "i love you", "flash"]
+led_commands     = ["off", "i love you", "flash", "green", "blue", "red"]
 servo_commands   = ["off", "claw"]
 speaker_commands = ["off", "play", "happy", "sad",  "play no surprises", "execute order 66", "i love you"]
 override_commands= ["off", "stop", "pause"]
@@ -177,9 +177,15 @@ def modeCommand():
 		if sonic_mode_event.is_set():
 			car.mode_ultrasonic()
 		if play_no_surprises_event.is_set():
-		    music.playSong(speaker, music.no_surprises, music.no_surprises_bpm)
+			music.playSong(speaker, music.no_surprises, music.no_surprises_bpm)
+			if music.music_index % 2 == 0:
+				for i in range(4):
+					led.ledIndex(i, 0, 120, 255)
+			else:
+				for i in range(4):
+					led.ledIndex(i, 0, 0, 0)	
 		if play_imperial_march_event.is_set():
-		    music.playSong(speaker, music.imperial_march, music.imperial_march_bpm)
+			music.playSong(speaker, music.imperial_march, music.imperial_march_bpm)
 		if play_sad_sound_event.is_set():
 			music.playSound(speaker, 1, music.happy_sound_bpm)
 		if play_happy_sound_event.is_set():
@@ -193,11 +199,16 @@ def ledCommand(cmd):
 		msg = cmd.get()
 		if msg == "flash":
 			led.theaterChaseRainbow()
-		if msg == "i love you":
+		if msg == "i love you" or msg == "red":
 			led.colorWipe((255, 0, 0))
+		if msg == "green":
+			led.colorWipe((0, 255, 0))
+		if msg == "blue":
+			led.colorWipe((0, 0, 255))
 		if "off" in msg:
 			break
 		cmd.task_done()
+			
 		
 def servoCommand(cmd):
 	while True:
