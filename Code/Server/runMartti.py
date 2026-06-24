@@ -244,6 +244,7 @@ def overrideCommand(cmd):
 			#speaker
 			speaker.stop()
 			play_no_surprises_event.clear()
+			sonic_mode_event.clear()
 			play_imperial_march_event.clear()
 			play_happy_sound_event.clear()
 			play_sad_sound_event.clear()
