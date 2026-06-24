@@ -2,46 +2,106 @@ import socket
 import time
 from threading import Timer
 from threading import Thread
+from threading import Lock
+from queue import Queue 
+import stt
 
+# queue to get transcribed speech
+raw_q = Queue()
+send_q = Queue()
+
+##Don't send data at the same time from different threads
+send_lock = Lock()
+
+###############################################
+
+
+## CONNECT TO RASPBERRY PI
 def connect():
     clientSocket, address = s.accept()
-    clientSocket.send(bytes("connected", "utf-8"))
+    with send_lock:
+        clientSocket.sendall(bytes("connected\n", "utf-8"))
     return clientSocket, address
-    
-def background_controller():
-    msg = input("Send message:")
-    clientSocket.send(bytes(msg, "utf-8"))
-    Timer(1, background_controller).start()
 
+
+## SEND DATA TO RASPBERRY PI
+def sendFromTerminal():
+    while True:
+        msg = input("Send message:") + "\n"
+        with send_lock:
+            clientSocket.sendall(bytes(msg, "utf-8"))
+
+def send(send_q):
+    while True:
+        msg = send_q.get()
+        print(msg)
+        with send_lock:
+            clientSocket.sendall(bytes(msg, "utf-8"))
+
+
+## LISTEN FOR DATA FROM RASPBERRY PI (currently not really used, but could be :D) 
 def listen():
-    #process msg
-    print(clientSocket.recv(1024).decode("utf-8"))
-    Timer(1, listen).start()
+    while True:
+        data = clientSocket.recv(1024)
+        if not data:
+            print("Client disconnected.")
+            break
+        print("Recieved:", data.decode("utf-8"))
 
 
+## TRANSCRIBE SPEECH TO GET COMMANDS
+def getCommand(raw_q, send_q): 
+    print("starting stt...")
+
+    #start threads
+    listen_thread = Thread(target=stt.listen, daemon=True)
+    transcribe_thread = Thread(target=stt.transcribe, args=(q,), daemon=True)
+    listen_thread.start()
+    transcribe_thread.start()
+
+    last_transcription = ""
+
+    # put words only new heard words into the send queue
+    while True:
+        raw_transcription = raw_q.get()
+        for word in raw_transcription.spit():
+            if word not in last_transcription:
+                send_q.put(word)
+        last_transcription = raw_transcription
+            
+
+################################################################
+
+#connect before starting anything
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.bind(('0.0.0.0', 6966))
+s.listen(1)
 
-s.bind(('0.0.0.0', 7548))
-s.listen()
 print('Server is now running.')
 
-#clientSocket, address = connect()
-#listener_thread = Thread(target=listen, daemon=True)
-    
+clientSocket, address = connect()
+print(f"Connection from {address} has been established.")
+
+#make threads for different things
+threads = []
+threads.append(Thread(target=listen, daemon=True))                  #listen from raspberry
+threads.append(Thread(target=send, args=(send_q,), daemon=True))         #send to raspberry
+threads.append(Thread(target=getCommand, args=(raw_q, send_q), daemon=True))   #get commands from mic + send only nex words
+
+
+
 try:
+    for thread in threads:
+        thread.start()
     while True:
         clientSocket, address = connect()
-        print(f"Connection from {address} has been established.")
-        #listener_thread.start()
-        background_controller()
-        listen()
-        
-    
-    
 except KeyboardInterrupt:
     pass
 finally:
-    print("Shutdown...")
+    print("Shutdown...")      # are there any unterminated while loops?
+    for thread in threads:
+        thread.join()
     s.shutdown(socket.SHUT_RDWR)
     s.close()
     

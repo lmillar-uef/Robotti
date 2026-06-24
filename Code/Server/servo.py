@@ -100,11 +100,14 @@ class HardwareServo:
 
 from parameter import ParameterManager
 class Servo:
-    def __init__(self):
+    def __init__(self, init0_angle=90, init1_angle=140):
         # Initialize the Servo instance
         self.param = ParameterManager()  # Initialize parameter manager
         self.pcb_version = self.param.get_pcb_version()  # Get PCB version
         self.pi_version = self.param.get_raspberry_pi_version()  # Get Raspberry Pi version
+        self.init0_angle = 90
+        self.init1_angle = 140
+        self.current_angle = [90, 140]
 
         if self.pcb_version == 1 and self.pi_version == 1:
             self.pwm = GpiozeroServo()  # Use GpiozeroServo for PCB version 1 and Raspberry Pi version 1
@@ -114,8 +117,11 @@ class Servo:
             self.pwm = HardwareServo(1)  # Use HardwareServo for PCB version 2 and Raspberry Pi version 1
         elif self.pcb_version == 2 and self.pi_version == 2:
             self.pwm = HardwareServo(2)  # Use HardwareServo for PCB version 2 and Raspberry Pi version 2
-        self.pwm.setServoPwm("0", 90)  # Set initial angle for servo 0
-        self.pwm.setServoPwm("1", 140)  # Set initial angle for servo 1
+        self.pwm.setServoPwm("0", self.init0_angle)  # Set initial angle for servo 0
+        self.pwm.setServoPwm("1", self.init1_angle)  # Set initial angle for servo 1
+        
+    def get_angle(self):
+        return current_angle
 
     def angle_range(self, channel, init_angle):
         # Ensure the angle is within the valid range for the specified channel
@@ -139,6 +145,7 @@ class Servo:
     def setServoAngle(self, channel, angle):
         # Set the angle for the specified channel
         angle = self.angle_range(str(channel), int(angle))  # Ensure the angle is within the valid range
+        self.current_angle[int(channel)]=int(angle)
         self.pwm.setServoPwm(str(channel), int(angle))  # Set the angle for the specified channel
 
     def setServoStop(self):

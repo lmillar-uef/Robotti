@@ -7,12 +7,12 @@ import time
 
 # Define the Car class to manage all components and functionalities
 class Car:
-    def __init__(self):
+    def __init__(self, ser=None, mot=None, son=None, inf=None): #give already initialized components if they have been initialised
         # Initialize all components to None
-        self.servo = None
-        self.sonic = None
-        self.motor = None
-        self.infrared = None
+        self.servo = ser
+        self.sonic = son
+        self.motor = mot
+        self.infrared = inf
         # Call the start method to initialize components
         self.start()
 
@@ -182,6 +182,7 @@ class Car:
             self.mode_clamp_down()
         elif self.clamp_mode == 0:
             self.mode_clamp_stop()
+        
 
 # Test function for clamp functionality
 def test_car_clamp():
