@@ -48,7 +48,7 @@ connected   = False
 servo0_home = 90
 servo1_home = 90
 motor_speed = 1300
-turn_time   = 2
+turn_time   = 0.55
 music.music_index = 0
 
 
@@ -70,6 +70,7 @@ def listenForCommand(out_q):
 			unpaused_event.clear()
 
 		elif not unpaused_event.is_set():
+			print("unpaused")
 			unpaused_event.set()
 		
 		##put msg in queue for excecution
@@ -110,13 +111,20 @@ def excecuteCommand(in_q, q_mot, q_spe, q_ser, q_led, q_override):
 		if msg == "ping":
 			sock.sendMessage("pong")
 		if "off" in msg:
-		    q_mot.put(msg)
-		    q_spe.put(msg)
-		    q_ser.put(msg)
-		    q_led.put(msg)
-		    q_override.put(msg)
+			q_mot.put(msg)
+			q_spe.put(msg)
+			q_ser.put(msg)
+			q_led.put(msg)
+			q_override.put(msg)
 			sock.shutDown()
 			break
+		if "stop" in msg: 
+			q_mot.put(msg)
+			q_spe.put(msg)
+			q_ser.put(msg)
+			q_led.put(msg)
+			q_override.put(msg)
+			
 			
 		#mark as done
 		in_q.task_done()
@@ -232,7 +240,7 @@ def speakerCommand(cmd):
 def overrideCommand(cmd):
 	while True:
 		msg = cmd.get()
-		if "stop" in msg or msg == "pause":
+		if msg == "pause" or msg == "stop" and not unpaused_event.is_set():
 			#speaker
 			speaker.stop()
 			play_no_surprises_event.clear()
