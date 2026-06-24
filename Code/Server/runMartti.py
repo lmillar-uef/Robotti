@@ -65,7 +65,7 @@ def listenForCommand(out_q):
 
 
 		#event to tell if robot needs to stop everything it is doing
-		if msg == "stop" or msg == "pause":
+		if "stop" in msg or msg == "pause":
 			print("pausing...")
 			unpaused_event.clear()
 
@@ -75,7 +75,7 @@ def listenForCommand(out_q):
 		##put msg in queue for excecution
 		out_q.put(msg)
 			
-		if msg == "off":
+		if "off" in msg:
 			off_event.set()
 			break 
 
@@ -109,7 +109,12 @@ def excecuteCommand(in_q, q_mot, q_spe, q_ser, q_led, q_override):
 		#excecute in this thread
 		if msg == "ping":
 			sock.sendMessage("pong")
-		if msg == "off":
+		if "off" in msg:
+		    q_mot.put(msg)
+		    q_spe.put(msg)
+		    q_ser.put(msg)
+		    q_led.put(msg)
+		    q_override.put(msg)
 			sock.shutDown()
 			break
 			
@@ -138,7 +143,7 @@ def motorCommand(cmd):
 			motor.setMotorModel(motor_speed, -motor_speed)
 			time.sleep(turn_time)
 			motor.setMotorModel(0, 0)
-		if msg == "off":
+		if "off" in msg:
 			break
 		cmd.task_done()
 		
@@ -169,7 +174,7 @@ def ledCommand(cmd):
 			led.theaterChaseRainbow()
 		if msg == "i love you":
 			led.colorWipe((255, 0, 0))
-		if msg == "off":
+		if "off" in msg:
 			break
 		cmd.task_done()
 		
@@ -183,7 +188,7 @@ def servoCommand(cmd):
 			time.sleep(2)
 			servo.setServoAngle('0', servo.init0_angle)
 			servo.setServoAngle('1', servo.init1_angle)  
-		if msg == "off":
+		if "off" in msg:
 			break
 		cmd.task_done()
 	
@@ -217,9 +222,9 @@ def speakerCommand(cmd):
 			play_happy_sound_event.clear()
 			play_sad_sound_event.set()
 			play_imperial_march_event.clear()	
-		if msg == "stop":		
+		if "stop" in msg:		
 			speaker.stop()
-		if msg == "off":
+		if "off" in msg:
 			break	
 		cmd.task_done()
 
@@ -227,7 +232,7 @@ def speakerCommand(cmd):
 def overrideCommand(cmd):
 	while True:
 		msg = cmd.get()
-		if msg == "stop" or msg == "pause":
+		if "stop" in msg or msg == "pause":
 			#speaker
 			speaker.stop()
 			play_no_surprises_event.clear()
@@ -242,7 +247,7 @@ def overrideCommand(cmd):
 			#car modes
 			sonic_mode_event.clear()
 			print("paused")
-		if msg == "off":
+		if "off" in msg:
 			break	
 		cmd.task_done()
 
