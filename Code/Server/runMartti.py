@@ -12,6 +12,7 @@ from threading import Event
 import time
 from queue import Queue
 from music import Music
+from random import randint
 
 
 ## ALL COMMANDS
@@ -62,7 +63,19 @@ def listenForCommand(out_q):
 		print("Listening...")
 		msg = sock.listenSock()
 		print(msg)
-
+		
+		if msg == "let's go gambling":
+			i = randint(0, 2)
+			if i == 0:
+				j = randint(0, len(motor_commands)-1)
+				msg = motor_commands[j]
+			elif i == 1:
+				j = randint(0, len(led_commands)-1)
+				msg = led_commands[j]
+			elif i == 2:
+				j = randint(0, len(speaker_commands)-1)
+				msg = speaker_commands[j]
+			 
 
 		#event to tell if robot needs to stop everything it is doing
 		if "stop" in msg or msg == "pause":
